@@ -141,7 +141,24 @@ function getDuplicates(arr) {
     })
     return filteredResults;
 }
-
+function intersection(arr1, arr2) {
+    let results = [];
+    for(var i = 0; i < arr1.length; i ++){
+        for(var j = 0; j < arr2.length; j ++) {
+            if(arr1[i]._id.equals(arr2[j]._id)){
+                results.push(arr1[i])
+            }
+        }
+    }
+    return results
+}
+function inter (arr) {
+    let ret = arr[0];
+    for(var i = 1; i < arr.length; i++) {
+         ret = intersection(ret, arr[i])
+    }
+    return ret;
+}
 async function search(searchObj) {
     let searchPromises = [];
     let dupCount = -1;
@@ -158,9 +175,11 @@ async function search(searchObj) {
         dupCount++;
     }
     let searchResults = await Promise.all(searchPromises);
-    searchResults = flatten(searchResults);
-    if(dupCount >= 1) return getDuplicates(searchResults);
-    return searchResults;
+    let ret = inter(searchResults);
+    return ret;
+    // searchResults = flatten(searchResults);
+    // if(dupCount >= 1) return getDuplicates(searchResults);
+    //return searchResults;
 }
 
 
