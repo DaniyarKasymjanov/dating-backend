@@ -76,6 +76,17 @@ app.post('/login', async (req, res) => {
         });
 })
 
+app.post('/search', async (req, res) => {
+    let parsedBody = JSON.parse(req.body.toString());
+    try {
+        const result = await dating.search(parsedBody);
+        console.log(result)
+        res.send(JSON.stringify({success: true, result}));
+    } catch (err) {
+        console.log(err)
+    }
+    
+})
 // io.on('connection', function (socket) {
 //     console.log('a user connected');
 //     socket.on('send_msg', function (msg) {
