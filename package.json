@@ -18,6 +18,7 @@
   "homepage": "https://github.com/DaniyarKasymajnov/dating-backend#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
     "express": "^4.16.3",
     "mongodb": "^3.1.0-beta4",
     "socket.io": "^2.1.0"

@@ -3,17 +3,34 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
-const dating = require('./dating.js')
+const dating = require('./dating.js');
+const cookieParser = require('cookie-parser');
 app.use(bodyParser.raw({ type: '*/*' }))
+app.use(cookieParser())
 
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.post('/register', (req, res) => {
+app.get('/session', async (req, res) => { 
+    let sessionID = req.cookies.session
+    console.log(sessionID);
+    const session = await dating.getSession(sessionID);
+    if(session) {
+        const user = await dating.getUser(session.username);
+        return res.send(JSON.stringify({ success: true, sessionID, user }));
+    }
+    res.send(JSON.stringify({ success: false }))
+})
+
+app.post('/register', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
     //console.log(parsedBody);
+    //add user session
+    const sessionID = await dating.addSession(parsedBody.username);
+    res.cookie('session', sessionID);
+    //register user
     parsedBody.accountCreationTime = Date.now();
     dating.registerUser(parsedBody).then(() =>
         res.send(JSON.stringify({ success: true })))
@@ -23,9 +40,11 @@ app.post('/register', (req, res) => {
         });
 })
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
     //console.log(parsedBody);
+    const sessionID = await dating.addSession(parsedBody.username);
+    res.cookie('session', sessionID);
     dating.loginUser(parsedBody).then((result) => {
         console.log(result)
         if (result) {
