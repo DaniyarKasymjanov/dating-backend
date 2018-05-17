@@ -7,6 +7,19 @@ const db = connect.then(client => client.db('dating'));
 const users = db.then(dbo => dbo.collection('users'));
 const sessions = db.then(dbo => dbo.collection('sessions'));
 
+function verifyUsername(usernameObj) {
+    return users.then(usersCollection => {
+        //console.log(loginObj);
+        return usersCollection
+        .findOne(usernameObj)
+        .then(res => 
+            {
+                console.log('looking for username', res)
+                return res
+            })
+        })
+}
+
 function registerUser(userObj) {
     //console.log(userObj)
     return users.then(usersCollection => { 
@@ -103,7 +116,7 @@ function searchInput(input) {
     return users.then(usersCollection => {
         return usersCollection
         .find({
-            $or: ['city', 'interests', 'about', 'lookingFor'].map(key => ({
+            $or: ['city', 'interests', 'aboutMe', 'lookingFor', 'education',].map(key => ({
                 [key]: { $regex: new RegExp(input, 'gi') }
                 }))
         })

@@ -24,6 +24,24 @@ app.get('/session', async (req, res) => {
     res.send(JSON.stringify({ success: false }))
 })
 
+app.post('/verifyUsername', async (req, res) => {
+    let parsedBody = JSON.parse(req.body.toString());
+    //console.log(parsedBody);
+    dating.verifyUsername(parsedBody).then((result) => {
+        //console.log(result)
+        if (result) {
+            res.send(JSON.stringify({ success: true }))
+        }
+        else {
+            res.send(JSON.stringify({ success: false }))
+        }})
+        .catch(err => {
+            console.log(err);
+
+        });
+
+})
+
 app.post('/register', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
     //console.log(parsedBody);
