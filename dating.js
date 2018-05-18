@@ -87,6 +87,29 @@ function getUser(username) {
             .findOne({ username })
     })
 }
+
+function getFavourites(sessionID) {
+    return getUsername(sessionID)
+    .then(username =>
+        users.then(usersCollection =>
+            usersCollection.findOne(
+                { username: username }
+            )
+            .then(user => user.likes)
+        )
+    )
+}
+
+function getLikedUsers(sessionID) {
+    return getFavourites(sessionID)
+    .then(favourites => users.then(usersCollection =>
+        usersCollection.find(
+            { username: { $in: favourites }}
+        )
+        .toArray()
+    ))
+}
+
 function getUsername(sessionID) {
     return sessions.then(sessionsCollection => {
         return sessionsCollection
@@ -95,7 +118,7 @@ function getUsername(sessionID) {
     })
 }
 function addLike(sessionID, target) {
-    console.log(target)
+    //console.log(target)
     return getUsername(sessionID)
     .then(username =>
         users.then(usersCollection =>
@@ -242,5 +265,6 @@ module.exports = {
     search,
     newAccounts,
     verifyUsername,
-    checkLiked
+    checkLiked,
+    getLikedUsers
 };

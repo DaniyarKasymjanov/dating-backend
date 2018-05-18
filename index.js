@@ -94,8 +94,10 @@ app.get('/home', (req, res) => {
     });
 })
 
-app.get('favourites', (req, res) => {
+app.get('/favourites', (req, res) => {
     let sessionID = req.cookies.session
+    console.log(sessionID)
+    dating.getLikedUsers(sessionID).then(res => console.log(res))
 })
 
 app.get('/getProfile', (req, res) => {
