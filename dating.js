@@ -117,6 +117,7 @@ function getUsername(sessionID) {
             .then(res => res.username)
     })
 }
+
 function addLike(sessionID, target) {
     //console.log(target)
     return getUsername(sessionID)
@@ -129,6 +130,22 @@ function addLike(sessionID, target) {
             ) 
         )
     )
+}
+
+function chechAnswers(username, ansArr) {
+    return getUser(username)
+    .then(res => {
+        var arr = res.questions.map(answer => answer.answer)
+        // console.log("Should be an array : ", arr)
+        var error_ = 0
+        arr.forEach((el,id)=>{
+            // console.log("shouldBeEqual",el,ansArr[id])
+            if (el !== ansArr[id]){
+                error_++
+            }
+        })
+        if(error_===0){return true}else{return false}
+    })
 }
 
 function addSession(username) {
@@ -223,6 +240,7 @@ function intersection(arr1, arr2) {
     }
     return results
 }
+
 function inter(arr) {
     let ret = arr[0];
     for (var i = 1; i < arr.length; i++) {
@@ -230,6 +248,7 @@ function inter(arr) {
     }
     return ret;
 }
+
 async function search(searchObj) {
     let searchPromises = [];
     let dupCount = -1;
@@ -266,5 +285,6 @@ module.exports = {
     newAccounts,
     verifyUsername,
     checkLiked,
-    getLikedUsers
+    getLikedUsers,
+    chechAnswers
 };

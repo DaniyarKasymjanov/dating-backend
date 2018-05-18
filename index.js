@@ -8,6 +8,8 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs');
 app.use(bodyParser.raw({ type: '*/*' }))
 app.use(cookieParser())
+app.use(express.static('images'))
+
 
 
 app.get('/', function (req, res) {
@@ -134,6 +136,18 @@ app.get('/getProfile', (req, res) => {
         });
 })
 
+app.post('/checkAnswers', (req,res) => {
+    let parsedBody = JSON.parse(req.body.toString());
+    let username = parsedBody.username;
+    let ansArr = parsedBody.answer
+    dating.chechAnswers(username, ansArr).then(result => {
+        res.send(JSON.stringify({success: result}));
+    })
+    .catch(err => {
+        console.log(err);
+
+    });
+})
 app.post('/like', (req, res) => {
     let sessionID = req.cookies.session
     console.log(sessionID)
@@ -160,7 +174,23 @@ app.post('/search', async (req, res) => {
 
 })
 
-app.post('/uploadImg', (req, res) => {
+app.post('/uploadExtraImages', (req, res) => {
+    let extension = req.query.extension;
+    let randomFileName = Math.random().toString(36).substring(7);
+    console.log(`items/${randomFileName}.${extension}`);
+    fs.writeFileSync(`images/${randomFileName}.${extension}`, req.body);
+    res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
+})
+
+app.post('/uploadProfileImg', (req, res) => {
+    let extension = req.query.extension;
+    let randomFileName = Math.random().toString(36).substring(7);
+    console.log(`items/${randomFileName}.${extension}`);
+    fs.writeFileSync(`images/${randomFileName}.${extension}`, req.body);
+    res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
+})
+
+app.post('/uploadBackgroundImg', (req, res) => {
     let extension = req.query.extension;
     let randomFileName = Math.random().toString(36).substring(7);
     console.log(`items/${randomFileName}.${extension}`);

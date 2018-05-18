@@ -19,11 +19,17 @@
 
                 //         })
                 // })
-                 fetch('/login', {
+                 fetch('/checkAnswers', {
                     method:'POST',
                     credentials: 'same-origin',
-                    body: JSON.stringify({username: 'Ben', password: '123'})
-                })
+                    body: JSON.stringify({
+                            
+                            username: 'Decode',
+                            answer: ["True", "0", "True", "True"]
+                        
+    
+                        })
+                }).then(e=>e.text()).then(e=>JSON.parse(e)).then(e=>console.log(e))
             }
         </script>
     </body>
