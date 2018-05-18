@@ -240,5 +240,6 @@ module.exports = {
     addSession,
     addLike,
     search,
-    newAccounts
+    newAccounts,
+    verifyUsername
 };
