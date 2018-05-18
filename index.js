@@ -30,10 +30,10 @@ app.post('/verifyUsername', async (req, res) => {
     dating.verifyUsername(parsedBody).then((result) => {
         //console.log(result)
         if (result) {
-            res.send(JSON.stringify({ success: true }))
+            res.send(JSON.stringify({ success: false }))
         }
         else {
-            res.send(JSON.stringify({ success: false }))
+            res.send(JSON.stringify({ success: true }))
         }
     })
         .catch(err => {
