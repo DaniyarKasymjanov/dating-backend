@@ -100,7 +100,7 @@ app.get('favourites', (req, res) => {
 
 app.get('/getProfile', (req, res) => {
     let sessionID = req.cookies.session
-    let username = req.query.itemID
+    let username = req.query.username
     dating.checkLiked({username}).then((result) => {
         if (result) {
             dating.userProfile(parsedBody).then((result) => {
