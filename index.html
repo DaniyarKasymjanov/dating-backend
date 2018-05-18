@@ -4,7 +4,7 @@
         <h1>Hey</h1>
         <button onclick="test()">test</button>
         <script>
-            async function test() {
+             function test() {console.log("ASD")
                 // await fetch('/register', {
                 //     method: 'POST',
                 //     credentials: 'same-origin',
@@ -19,16 +19,18 @@
 
                 //         })
                 // })
-                await fetch('/verifyUsername', {
+                 fetch('/verifyUsername', {
                     method: 'POST',
                     
                     body: JSON.stringify(
                         {
                             
-                            username: 'Mike'
+                            username: 'decode'
 
                         })
-                })
+                }).then(e=>e.text())
+                .then(e=>JSON.parse(e))
+                .then(e=>console.log(e))
             }
         </script>
     </body>

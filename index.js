@@ -26,9 +26,9 @@ app.get('/session', async (req, res) => {
 
 app.post('/verifyUsername', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
-    //console.log(parsedBody);
+    console.log("par",parsedBody);
     dating.verifyUsername(parsedBody).then((result) => {
-        //console.log(result)
+        console.log("res",result)
         if (result) {
             res.send(JSON.stringify({ success: false }))
         }
@@ -91,14 +91,17 @@ app.get('/home', (req, res) => {
     })
     .catch(err => {
         console.log(err);
-
     });
 })
 
-app.post('/getProfile', (req, res) => {
+app.get('favourites', (req, res) => {
     let sessionID = req.cookies.session
-    let parsedBody = JSON.parse(req.body.toString());
-    dating.checkLiked(parsedBody).then((result) => {
+})
+
+app.get('/getProfile', (req, res) => {
+    let sessionID = req.cookies.session
+    let username = req.query.itemID
+    dating.checkLiked({username}).then((result) => {
         if (result) {
             dating.userProfile(parsedBody).then((result) => {
                 console.log(result)
