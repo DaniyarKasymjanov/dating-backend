@@ -11,80 +11,115 @@ function verifyUsername(usernameObj) {
     return users.then(usersCollection => {
         //console.log(loginObj);
         return usersCollection
-        .findOne(usernameObj)
-        .then(res => 
-            {
+            .findOne(usernameObj)
+            .then(res => {
                 console.log('looking for username', res)
                 return res
             })
-        })
+    })
 }
 
 function registerUser(userObj) {
     //console.log(userObj)
-    return users.then(usersCollection => { 
+    return users.then(usersCollection => {
         return usersCollection
-        .insertOne(userObj)
-        .then(res => 
-            {
+            .insertOne(userObj)
+            .then(res => {
                 console.log('user added', res)
             })
-        })
+    })
 }
 
 function loginUser(loginObj) {
     return users.then(usersCollection => {
         //console.log(loginObj);
         return usersCollection
-        .findOne(loginObj)
-        .then(res => 
-            {
+            .findOne(loginObj)
+            .then(res => {
                 console.log('looking for user', res)
                 return res
             })
-        })
+    })
+}
+
+function newAccounts(date) {
+    return users.then(usersCollection => {
+        return usersCollection
+            .find({accountCreationTime: {$gt: date}})
+            .toArray()
+    })
 }
 
 function userProfile(profileObj) {
     return users.then(usersCollection => {
         //console.log(loginObj);
         return usersCollection
-        .findOne(profileObj)
-        .then(res => 
-            {
+            .findOne(profileObj)
+            .then(res => {
                 console.log('looking for profile', res)
                 return res
             })
-        })
+    })
 }
 
 function getSession(sessionID) {
     return sessions.then(sessionsCollection => {
         return sessionsCollection
-        .findOne({ _id: ObjectId(sessionID) })
-        .catch(err => console.log(err))
+            .findOne({ _id: ObjectId(sessionID) })
+            .catch(err => console.log(err))
+    })
+}
+
+function checkLicked(sessionID, target) {
+    return users.then(usersCollection => {
+        return usersCollection
+            .findOne({ _id: ObjectId(sessionID), likes: { $in: target } })
+            .then(res => {
+                return res
+
+            })
     })
 }
 
 function getUser(username) {
     return users.then(usersCollection => {
         return usersCollection
-        .findOne({ username })
+            .findOne({ username })
     })
+}
+function getUsername(sessionID) {
+    return sessions.then(sessionsCollection => {
+        return sessionsCollection
+            .findOne({ _id: ObjectId(sessionID) })
+            .then(res => res.username)
+    })
+}
+function addLike(sessionID, target) {
+    console.log(target)
+    return getUsername(sessionID)
+    .then(username =>
+        users.then(usersCollection =>
+            usersCollection.update(
+                { username: username },
+                { $addToSet: { likes: target } }
+    
+            ) 
+        )
+    )
 }
 
 function addSession(username) {
     return sessions.then(sessionsCollection => {
         return sessionsCollection
-        .insertOne({ username, createdAt: new Date() })
-        .then(res => res.insertedId.valueOf())
-        .catch(err => console.log(err))
+            .insertOne({ username, createdAt: new Date() })
+            .then(res => res.insertedId.valueOf())
+            .catch(err => console.log(err))
     })
 }
 
 function getBirthday(age) {
     const now = new Date();
-    return new Date(now.setFullYear( now.getFullYear() - age));
+    return new Date(now.setFullYear(now.getFullYear() - age));
 }
 
 //needs parameter of the form {from: 20, to: 40}
@@ -93,10 +128,10 @@ function searchAge(age) {
     const lteBirthday = getBirthday(age.from);
     return users.then(usersCollection => {
         return usersCollection
-        .find({
-            birthday: { $gte: gteBirthday, $lte: lteBirthday }
-        })
-        .toArray()
+            .find({
+                birthday: { $gte: gteBirthday, $lte: lteBirthday }
+            })
+            .toArray()
     })
 }
 
@@ -104,10 +139,10 @@ function searchAge(age) {
 function searchFields(fields) {
     return users.then(usersCollection => {
         return usersCollection
-        .find({
-            $and: Object.keys(fields).map(key => ({ [key]: fields[key] })),
-        })
-        .toArray()
+            .find({
+                $and: Object.keys(fields).map(key => ({ [key]: fields[key] })),
+            })
+            .toArray()
     })
 }
 
@@ -115,17 +150,17 @@ function searchFields(fields) {
 function searchInput(input) {
     return users.then(usersCollection => {
         return usersCollection
-        .find({
-            $or: ['city', 'interests', 'aboutMe', 'lookingFor', 'education',].map(key => ({
-                [key]: { $regex: new RegExp(input, 'gi') }
+            .find({
+                $or: ['city', 'interests', 'aboutMe', 'lookingFor', 'education',].map(key => ({
+                    [key]: { $regex: new RegExp(input, 'gi') }
                 }))
-        })
-        .toArray()
+            })
+            .toArray()
     })
 }
 
 function flatten(arr) {
-    return arr.reduce((acc,curr) => {
+    return arr.reduce((acc, curr) => {
         return [...acc, ...curr];
     }, []);
 }
@@ -145,7 +180,7 @@ function getDuplicates(arr) {
     let filteredResults = [];
     arr.forEach(obj => {
         const stringified = JSON.stringify(obj);
-        if(hashMap[stringified] === 1) {
+        if (hashMap[stringified] === 1) {
             filteredResults.push(obj)
             hashMap[stringified] += 1;
         } else {
@@ -156,34 +191,34 @@ function getDuplicates(arr) {
 }
 function intersection(arr1, arr2) {
     let results = [];
-    for(var i = 0; i < arr1.length; i ++){
-        for(var j = 0; j < arr2.length; j ++) {
-            if(arr1[i]._id.equals(arr2[j]._id)){
+    for (var i = 0; i < arr1.length; i++) {
+        for (var j = 0; j < arr2.length; j++) {
+            if (arr1[i]._id.equals(arr2[j]._id)) {
                 results.push(arr1[i])
             }
         }
     }
     return results
 }
-function inter (arr) {
+function inter(arr) {
     let ret = arr[0];
-    for(var i = 1; i < arr.length; i++) {
-         ret = intersection(ret, arr[i])
+    for (var i = 1; i < arr.length; i++) {
+        ret = intersection(ret, arr[i])
     }
     return ret;
 }
 async function search(searchObj) {
     let searchPromises = [];
     let dupCount = -1;
-    if(searchObj.age) {
+    if (searchObj.age) {
         searchPromises = searchPromises.concat(searchAge(searchObj.age));
         dupCount++;
     }
-    if(searchObj.searchInput) {
+    if (searchObj.searchInput) {
         searchPromises = searchPromises.concat(searchInputs(searchObj.searchInput));
         dupCount++;
     }
-    if(searchObj.fields) {
+    if (searchObj.fields) {
         searchPromises = searchPromises.concat(searchFields(searchObj.fields));
         dupCount++;
     }
@@ -203,5 +238,7 @@ module.exports = {
     getSession,
     getUser,
     addSession,
+    addLike,
     search,
+    newAccounts
 };

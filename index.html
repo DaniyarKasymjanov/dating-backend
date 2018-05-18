@@ -1,0 +1,30 @@
+<html>
+    <head></head>
+    <body>
+        <h1>Hey</h1>
+        <button onclick="test()">test</button>
+        <script>
+            async function test() {
+                // await fetch('/register', {
+                //     method: 'POST',
+                //     credentials: 'same-origin',
+                //     body: JSON.stringify(
+                //         {
+                //             username: 'Ben',
+                //             password: '123',
+                //             birthday: '1988-08-13',
+                //             city: 'Montreal',
+                //             gender: 'Male',
+                //             questions: []
+
+                //         })
+                // })
+                await fetch('/home', {
+
+                    credentials: 'same-origin',
+                    
+                })
+            }
+        </script>
+    </body>
+</html>
