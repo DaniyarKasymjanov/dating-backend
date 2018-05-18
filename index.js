@@ -5,6 +5,7 @@ const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
 const dating = require('./dating.js');
 const cookieParser = require('cookie-parser');
+const fs = require('fs');
 app.use(bodyParser.raw({ type: '*/*' }))
 app.use(cookieParser())
 
@@ -69,7 +70,7 @@ app.post('/login', async (req, res) => {
     dating.loginUser(parsedBody).then((result) => {
         console.log(result)
         if (result) {
-            res.send(JSON.stringify({ success: true }))
+            res.send(JSON.stringify({ success: true, username: result }))
         }
         else {
             res.send(JSON.stringify({ success: false }))
@@ -159,6 +160,14 @@ app.post('/search', async (req, res) => {
 
 })
 
+app.post('/uploadImg', (req, res) => {
+    let extension = req.query.extension;
+    let randomFileName = Math.random().toString(36).substring(7);
+    console.log(`items/${randomFileName}.${extension}`);
+    fs.writeFileSync(`images/${randomFileName}.${extension}`, req.body);
+    res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
+})
+
 http.listen(4000, function () {
     console.log('listening on *:4000');
 });
@@ -172,17 +181,6 @@ http.listen(4000, function () {
 //     });
 // });
 
-
-
-// async function registerUser(userObj) {
-//     try {
-//         const usersCollection = await users;
-//         const res = await usersCollection.insertOne(userObj);
-//         console.log('user added');
-//     } catch (err) {
-//         console.log(err);
-//     }
-// }
 
 // app.get('/session', (req, res) => { 
 //     let sessionID = req.cookies.session

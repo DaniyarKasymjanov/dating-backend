@@ -19,8 +19,10 @@
 
                 //         })
                 // })
-                 fetch('/favourites', {
-                    credentials: 'same-origin'
+                 fetch('/login', {
+                    method:'POST',
+                    credentials: 'same-origin',
+                    body: JSON.stringify({username: 'Ben', password: '123'})
                 })
             }
         </script>
