@@ -70,10 +70,10 @@ function getSession(sessionID) {
     })
 }
 
-function checkLicked(sessionID, target) {
+function checkLiked(sessionID, target) {
     return users.then(usersCollection => {
         return usersCollection
-            .findOne({ _id: ObjectId(sessionID), likes: { $in: target } })
+            .findOne({ _id: ObjectId(sessionID), likes: { $in: [target] } })
             .then(res => {
                 return res
 
@@ -241,5 +241,6 @@ module.exports = {
     addLike,
     search,
     newAccounts,
-    verifyUsername
+    verifyUsername,
+    checkLiked
 };

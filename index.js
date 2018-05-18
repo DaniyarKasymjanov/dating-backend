@@ -101,9 +101,9 @@ app.get('favourites', (req, res) => {
 app.get('/getProfile', (req, res) => {
     let sessionID = req.cookies.session
     let username = req.query.username
-    dating.checkLiked({username}).then((result) => {
+    dating.checkLiked(sessionID, username).then((result) => {
         if (result) {
-            dating.userProfile(parsedBody).then((result) => {
+            dating.userProfile({username}).then((result) => {
                 console.log(result)
                 if (result) {
                     res.send(JSON.stringify({ result, liked: true }))
@@ -114,7 +114,7 @@ app.get('/getProfile', (req, res) => {
             })
         }
         else {
-            dating.userProfile(parsedBody).then((result) => {
+            dating.userProfile({username}).then((result) => {
                 console.log(result)
                 if (result) {
                     res.send(JSON.stringify({ result, liked: false }))
