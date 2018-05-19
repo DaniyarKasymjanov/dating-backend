@@ -191,7 +191,7 @@ function searchInput(input) {
     return users.then(usersCollection => {
         return usersCollection
             .find({
-                $or: ['city', 'interests', 'aboutMe', 'lookingFor', 'education',].map(key => ({
+                $or: ['city', 'interests', 'aboutMe', 'lookingFor', 'education'].map(key => ({
                     [key]: { $regex: new RegExp(input, 'gi') }
                 }))
             })

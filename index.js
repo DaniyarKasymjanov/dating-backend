@@ -203,13 +203,17 @@ http.listen(4000, function () {
 });
 
 
-// io.on('connection', function (socket) {
-//     console.log('a user connected');
-//     socket.on('send_msg', function (msg) {
-//         console.log(msg);
-//         socket.broadcast.emit('receive_msg', 'hey there');
-//     });
-// });
+io.on('connection', function (socket) {
+    console.log('a user connected');
+    console.log(socket);
+    socket.on('send_msg', function (msg) {
+        console.log(msg);
+        console.log(socket);
+        if(!socket.ctr) socket.ctr = 0;
+        socket.ctr++;
+        socket.broadcast.emit('receive_msg', 'hey there');
+    });
+});
 
 
 // app.get('/session', (req, res) => { 

@@ -19,13 +19,13 @@
 
                 //         })
                 // })
-                 fetch('/checkAnswers', {
+                 fetch('/search', {
                     method:'POST',
                     credentials: 'same-origin',
                     body: JSON.stringify({
                             
-                            username: 'Decode',
-                            answer: ["True", "0", "True", "True"]
+                            fields: {gender: "Male"},
+                            searchInput: ["paris", "walks"]
                         
     
                         })
