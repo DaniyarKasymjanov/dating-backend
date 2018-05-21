@@ -6,6 +6,7 @@ const connect = MongoClient.connect(uri, { useNewUrlParser: true });
 const db = connect.then(client => client.db('dating'));
 const users = db.then(dbo => dbo.collection('users'));
 const sessions = db.then(dbo => dbo.collection('sessions'));
+const chats = db.then(dbo => dbo.collection('chats'));
 
 function verifyUsername(usernameObj) {
     return users.then(usersCollection => {
@@ -272,6 +273,73 @@ async function search(searchObj) {
     //return searchResults;
 }
 
+function addChat(username, chatID) {
+    return users.then(usersCollection => {
+        return usersCollection.update(
+            { username },
+            { $addToSet: { chats: chatID} }
+        )
+        .catch(err => console.log(err))
+    })
+}
+
+function createChat(senderName, receiverName) {
+    return chats.then(chatsCollection => {
+        return chatsCollection.insertOne({
+            name: `${senderName}+${receiverName}`,
+            messages: []
+        })
+        .then(res => res.insertedId)
+        .catch(err => console.log(err))
+    })
+}
+
+function getChatByID(chatID) {
+    return chats.then(chatsCollection => {
+        return chatsCollection.findOne({
+            _id: ObjectId(chatID)
+        })
+        .catch(err => console.log(err))
+    })
+   }
+
+function getChatByName(senderName, receiverName) {
+ return chats.then(chatsCollection => {
+     return chatsCollection.findOne({
+         name: `${senderName}+${receiverName}`
+     })
+     .catch(err => console.log(err))
+ })
+}
+
+async function getChat(senderName, receiverName) {
+    console.log(senderName, receiverName);
+    let chat = await getChatByName(senderName, receiverName);
+    console.log('chat', chat);
+    if(chat) return chat;
+    chat = await getChatByName(receiverName, senderName);
+    console.log('chat', chat);
+    if(chat) return chat;
+    console.log('creating chat');
+    let chatID = await createChat(senderName, receiverName);
+    console.log(chatID);
+    await addChat(senderName, chatID);
+    await addChat(receiverName, chatID);
+    chat = await getChatByID(chatID);
+    console.log(chat)
+    return chat;
+}
+
+function addMessage(chatID, messageObj) {
+    console.log(chatID, messageObj)
+    return chats.then(chatsCollection => {
+        return chatsCollection.update(
+            { _id: ObjectId(chatID) },
+            { $push: { messages: messageObj} }
+        )
+        .catch(err => console.log(err))
+    })
+}
 
 module.exports = {
     registerUser,
@@ -286,5 +354,7 @@ module.exports = {
     verifyUsername,
     checkLiked,
     getLikedUsers,
-    chechAnswers
+    chechAnswers,
+    getChat,
+    addMessage
 };

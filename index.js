@@ -25,7 +25,7 @@ app.get('/session', async (req, res) => {
         return res.send(JSON.stringify({ success: true, sessionID, user }));
     }
     res.send(JSON.stringify({ success: false }))
-})
+});
 
 app.post('/verifyUsername', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
@@ -44,7 +44,7 @@ app.post('/verifyUsername', async (req, res) => {
 
         });
 
-})
+});
 
 app.post('/register', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
@@ -62,7 +62,7 @@ app.post('/register', async (req, res) => {
             console.log(err);
             res.send(JSON.stringify({ success: false }))
         });
-})
+});
 
 app.post('/login', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
@@ -83,11 +83,11 @@ app.post('/login', async (req, res) => {
 
         });
 
-})
+});
 
-app.get('/home', (req, res) => {
+app.get('/main', (req, res) => {
     let minDate = (Date.now() - 86400000)
-    console.log(minDate);
+    //console.log(minDate);
     dating.newAccounts(minDate).then((result) => {
         console.log(result);
         res.send(JSON.stringify({result, success: true}))
@@ -95,13 +95,18 @@ app.get('/home', (req, res) => {
     .catch(err => {
         console.log(err);
     });
-})
+});
 
-app.get('/favourites', (req, res) => {
+app.get('/favorites', (req, res) => {
     let sessionID = req.cookies.session
-    console.log(sessionID)
-    dating.getLikedUsers(sessionID).then(res => console.log(res))
-})
+    //console.log(sessionID)
+    dating.getLikedUsers(sessionID).then(result => {
+        if(result) {
+            res.send(JSON.stringify({success: true, result}))
+        }
+        return JSON.stringify({success: false});
+    });
+});
 
 app.get('/getProfile', (req, res) => {
     let sessionID = req.cookies.session
@@ -134,7 +139,7 @@ app.get('/getProfile', (req, res) => {
             console.log(err);
 
         });
-})
+});
 
 app.post('/checkAnswers', (req,res) => {
     let parsedBody = JSON.parse(req.body.toString());
@@ -147,7 +152,8 @@ app.post('/checkAnswers', (req,res) => {
         console.log(err);
 
     });
-})
+});
+
 app.post('/like', (req, res) => {
     let sessionID = req.cookies.session
     console.log(sessionID)
@@ -160,7 +166,7 @@ app.post('/like', (req, res) => {
             console.log(err);
 
         });
-})
+});
 
 app.post('/search', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
@@ -180,7 +186,7 @@ app.post('/uploadExtraImages', (req, res) => {
     console.log(`items/${randomFileName}.${extension}`);
     fs.writeFileSync(`images/${randomFileName}.${extension}`, req.body);
     res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
-})
+});
 
 app.post('/uploadProfileImg', (req, res) => {
     let extension = req.query.extension;
@@ -188,7 +194,7 @@ app.post('/uploadProfileImg', (req, res) => {
     console.log(`items/${randomFileName}.${extension}`);
     fs.writeFileSync(`images/${randomFileName}.${extension}`, req.body);
     res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
-})
+});
 
 app.post('/uploadBackgroundImg', (req, res) => {
     let extension = req.query.extension;
@@ -196,34 +202,32 @@ app.post('/uploadBackgroundImg', (req, res) => {
     console.log(`items/${randomFileName}.${extension}`);
     fs.writeFileSync(`images/${randomFileName}.${extension}`, req.body);
     res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
-})
+});
+
+app.post('/getChat', (req, res) => {
+    let parsedBody = JSON.parse(req.body.toString());
+    dating.getChat(parsedBody.senderName, parsedBody.receiverName)
+    .then(chat => {
+        return res.send(JSON.stringify({ success: true, chat }));
+    })
+});
+
+io.on('connection', (socket) => {
+    console.log('a user connected to chat');
+    socket.on('join', (res) => {
+        socket.chatID = res.chatID;
+        socket.join(res.chatID);
+    })
+    socket.on('send_msg', (res) => {
+        dating.addMessage(socket.chatID, res);
+        socket.emit('receive_msg', { message: res.message });
+    });
+    socket.on('disconnect', (reason) => {
+        console.log('disconnected: ', reason);
+        socket.leave(socket.chatID)
+      });    
+});
 
 http.listen(4000, function () {
     console.log('listening on *:4000');
 });
-
-
-io.on('connection', function (socket) {
-    console.log('a user connected');
-    console.log(socket);
-    socket.on('send_msg', function (msg) {
-        console.log(msg);
-        console.log(socket);
-        if(!socket.ctr) socket.ctr = 0;
-        socket.ctr++;
-        socket.broadcast.emit('receive_msg', 'hey there');
-    });
-});
-
-
-// app.get('/session', (req, res) => { 
-//     let sessionID = req.cookies.session
-//     console.log(sessionInfo[sessionID])
-//     if (!sessionInfo[sessionID]) {
-//         sessionID = Math.floor(Math.random() * 100000000)
-//         sessionInfo[sessionID] = {cartItems: [], name: '', email: '' };
-//         res.cookie('session', sessionID, { expires: new Date(Date.now() + (1000 * 60 * 60 * 24)) });
-//     }
-//     // res.send(JSON.stringify({ success: true, sessionID, name: sessionInfo[sessionID].name, email: sessionInfo[sessionID].email, cartItems: sessionInfo[sessionID].cartItems }))
-//     res.send(JSON.stringify({ success: true, sessionID, ...sessionInfo[sessionID] }))
-//})
