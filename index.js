@@ -18,8 +18,10 @@ app.get('/', function (req, res) {
 
 app.get('/session', async (req, res) => {
     let sessionID = req.cookies.session
+    console.log('---------SESSION-------------');
     console.log(sessionID);
     const session = await dating.getSession(sessionID);
+    console.log(session)
     if (session) {
         const user = await dating.getUser(session.username);
         return res.send(JSON.stringify({ success: true, sessionID, user }));
@@ -51,7 +53,7 @@ app.post('/register', async (req, res) => {
     //console.log(parsedBody);
     //add user session
     const sessionID = await dating.addSession(parsedBody.username);
-    res.cookie('session', sessionID);
+    res.cookie('REGISTER sessionID', sessionID);
     console.log(sessionID)
     //register user
     parsedBody.accountCreationTime = Date.now();
@@ -68,9 +70,10 @@ app.post('/login', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
     //console.log(parsedBody);
     const sessionID = await dating.addSession(parsedBody.username);
+    console.log('LOGIN sessionID', sessionID)
     res.cookie('session', sessionID);
     dating.loginUser(parsedBody).then((result) => {
-        console.log(result)
+        console.log('hgfdsfghjhgfds', result)
         if (result) {
             res.send(JSON.stringify({ success: true, username: result }))
         }
@@ -84,6 +87,13 @@ app.post('/login', async (req, res) => {
         });
 
 });
+
+app.get('/logout', (req, res) => {
+    let sessionID = req.cookies.session
+    dating.logoutUser(sessionID).then((result) => {
+        res.send(JSON.stringify({success: true}))
+    })
+})
 
 app.get('/main', (req, res) => {
     let minDate = (Date.now() - 86400000)
@@ -141,11 +151,27 @@ app.get('/getProfile', (req, res) => {
         });
 });
 
+app.post('/editProfile', (req, res) => {
+    let sessionID = req.cookies.session;
+    let parsedBody = JSON.parse(req.body.toString());
+    dating.editProfile(sessionID, parsedBody).then(result => {
+        res.send(JSON.stringify({success: true}))
+    })
+})
+
+app.post('updateQuestions', (req, res) => {
+    let sessionID = req.cookies.session;
+    let parsedBody = JSON.parse(req.body.toString());
+    dating.updateQuestions(sessionID, parsedBody).then (result => {
+        res.send(JSON.stringify({success: true}))
+    })
+})
+
 app.post('/checkAnswers', (req,res) => {
     let parsedBody = JSON.parse(req.body.toString());
     let username = parsedBody.username;
     let ansArr = parsedBody.answer
-    dating.chechAnswers(username, ansArr).then(result => {
+    dating.checkAnswers(username, ansArr).then(result => {
         res.send(JSON.stringify({success: result}));
     })
     .catch(err => {
@@ -161,6 +187,20 @@ app.post('/like', (req, res) => {
     console.log("PARSEBODY USERNAME",parsedBody.username)
     dating.addLike(sessionID, parsedBody.username).then((result) => {
         res.send(JSON.stringify({ success: true /*insert data here*/ }))
+    })
+        .catch(err => {
+            console.log(err);
+
+        });
+});
+
+app.post('/unlike', (req, res) => {
+    let sessionID = req.cookies.session
+    //console.log(sessionID)
+    let parsedBody = JSON.parse(req.body.toString());
+    dating.removeLike(sessionID, parsedBody.username).then((result) => {
+        //console.log(result)
+        res.send(JSON.stringify({ success: true }))
     })
         .catch(err => {
             console.log(err);
@@ -204,6 +244,14 @@ app.post('/uploadBackgroundImg', (req, res) => {
     res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
 });
 
+app.get('/getChats', (req, res) => {
+    let sessionID = req.cookies.session
+    dating.getChats(sessionID)
+    .then(chats => {
+        return res.send(JSON.stringify({ success: true, chats }));
+    })
+});
+
 app.post('/getChat', (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
     dating.getChat(parsedBody.senderName, parsedBody.receiverName)
@@ -220,7 +268,7 @@ io.on('connection', (socket) => {
     })
     socket.on('send_msg', (res) => {
         dating.addMessage(socket.chatID, res);
-        socket.emit('receive_msg', { message: res.message });
+        socket.emit('receive_msg', res);
     });
     socket.on('disconnect', (reason) => {
         console.log('disconnected: ', reason);
