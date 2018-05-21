@@ -58,8 +58,8 @@ app.post('/register', async (req, res) => {
     //register user
     parsedBody.accountCreationTime = Date.now();
     parsedBody.likes = []
-    dating.registerUser(parsedBody).then(() =>
-        res.send(JSON.stringify({ success: true })))
+    dating.registerUser(parsedBody).then((result) =>
+        res.send(JSON.stringify({ success: true, username: result })))
         .catch(err => {
             console.log(err);
             res.send(JSON.stringify({ success: false }))
@@ -159,7 +159,7 @@ app.post('/editProfile', (req, res) => {
     })
 })
 
-app.post('updateQuestions', (req, res) => {
+app.post('/updateQuestions', (req, res) => {
     let sessionID = req.cookies.session;
     let parsedBody = JSON.parse(req.body.toString());
     dating.updateQuestions(sessionID, parsedBody).then (result => {
