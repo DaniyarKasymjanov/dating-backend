@@ -156,11 +156,11 @@ app.post('/checkAnswers', (req,res) => {
 
 app.post('/like', (req, res) => {
     let sessionID = req.cookies.session
-    console.log(sessionID)
+    console.log("SESSIONID",sessionID)
     let parsedBody = JSON.parse(req.body.toString());
+    console.log("PARSEBODY USERNAME",parsedBody.username)
     dating.addLike(sessionID, parsedBody.username).then((result) => {
-        console.log(result)
-        res.send(JSON.stringify({ success: true }))
+        res.send(JSON.stringify({ success: true /*insert data here*/ }))
     })
         .catch(err => {
             console.log(err);

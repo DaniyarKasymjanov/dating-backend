@@ -115,7 +115,7 @@ function getUsername(sessionID) {
     return sessions.then(sessionsCollection => {
         return sessionsCollection
             .findOne({ _id: ObjectId(sessionID) })
-            .then(res => res.username)
+            .then(res => {return res.username})
     })
 }
 
