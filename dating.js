@@ -25,10 +25,15 @@ function registerUser(userObj) {
     return users.then(usersCollection => {
         return usersCollection
             .insertOne(userObj)
-            .then(res => {
-                console.log('user added', res)
+            .then(res => res.insertedId.valueOf())
+            .then(result => {
+                console.log(result)
+                return result.findOne({ _id: ObjectId(result) })
+                .then(res => res.username)
+                
             })
     })
+    .catch(err => console.log(err))
 }
 
 function loginUser(loginObj) {
@@ -43,10 +48,19 @@ function loginUser(loginObj) {
     })
 }
 
+function logoutUser(sessionID) {
+    console.log('logoutUser', sessionID)
+    return sessions.then(sessionsCollection => {
+        return sessionsCollection
+            .deleteOne({ _id: ObjectId(sessionID) })
+            .catch(err => console.log(err))
+    })
+}
+
 function newAccounts(date) {
     return users.then(usersCollection => {
         return usersCollection
-            .find({accountCreationTime: {$gt: date}})
+            .find({ accountCreationTime: { $gt: date } })
             .toArray()
     })
 }
@@ -63,6 +77,39 @@ function userProfile(profileObj) {
     })
 }
 
+function editProfile(sessionID, editObj) {
+    //console.log(editObj, sessionID)
+    return getUsername(sessionID)
+        .then(username => {
+            return users.then(usersCollection => {
+                return usersCollection.findOneAndUpdate(
+                    { username: username },
+                    editObj)
+                    .then(res => {
+                        console.log(res)
+                        return res
+                    })
+            })
+        })
+        .catch(err => console.log(err))
+}
+
+function updateQuestions(sessionID, questionObj) {
+    return getUsername(sessionID)
+        .then(username => {
+            return users.then(usersCollection => {
+                return usersCollection.findOneAndUpdate(
+                    { username: username },
+                    questionObj)
+                    .then(res => {
+                        console.log(res)
+                        return res
+                    })
+            })
+        })
+    .catch (err => console.log(err))
+}
+
 function getSession(sessionID) {
     return sessions.then(sessionsCollection => {
         return sessionsCollection
@@ -72,14 +119,17 @@ function getSession(sessionID) {
 }
 
 function checkLiked(sessionID, target) {
-    return users.then(usersCollection => {
-        return usersCollection
-            .findOne({ _id: ObjectId(sessionID), likes: { $in: [target] } })
-            .then(res => {
-                return res
+    return getUsername(sessionID)
+        .then(username => {
+            return users.then(usersCollection => {
+                return usersCollection
+                    .findOne({ username: username, likes: { $elemMatch: { $eq: target } } })
+                    .then(res => {
+                        return res
 
+                    })
             })
-    })
+        })
 }
 
 function getUser(username) {
@@ -91,24 +141,24 @@ function getUser(username) {
 
 function getFavourites(sessionID) {
     return getUsername(sessionID)
-    .then(username =>
-        users.then(usersCollection =>
-            usersCollection.findOne(
-                { username: username }
+        .then(username =>
+            users.then(usersCollection =>
+                usersCollection.findOne(
+                    { username: username }
+                )
+                    .then(user => user.likes)
             )
-            .then(user => user.likes)
         )
-    )
 }
 
 function getLikedUsers(sessionID) {
     return getFavourites(sessionID)
-    .then(favourites => users.then(usersCollection =>
-        usersCollection.find(
-            { username: { $in: favourites }}
-        )
-        .toArray()
-    ))
+        .then(favourites => users.then(usersCollection =>
+            usersCollection.find(
+                { username: { $in: favourites } }
+            )
+                .toArray()
+        ))
 }
 
 function getUsername(sessionID) {
@@ -122,38 +172,54 @@ function getUsername(sessionID) {
 function addLike(sessionID, target) {
     //console.log(target)
     return getUsername(sessionID)
-    .then(username =>
-        users.then(usersCollection =>
-            usersCollection.update(
-                { username: username },
-                { $addToSet: { likes: target } }
-    
-            ) 
+        .then(username =>
+            users.then(usersCollection =>
+                usersCollection.update(
+                    { username: username },
+                    { $addToSet: { likes: target } }
+
+                )
+            )
         )
-    )
 }
 
-function chechAnswers(username, ansArr) {
+function removeLike(sessionID, target) {
+    //console.log(target)
+    return getUsername(sessionID)
+        .then(username => {
+            console.log(username, "ASD", target)
+            users.then(usersCollection =>
+                usersCollection.update(
+                    { username: username },
+                    { $pull: { likes: target } }
+
+                )
+            )
+        }
+        )
+}
+
+function checkAnswers(username, ansArr) {
     return getUser(username)
-    .then(res => {
-        var arr = res.questions.map(answer => answer.answer)
-        // console.log("Should be an array : ", arr)
-        var error_ = 0
-        arr.forEach((el,id)=>{
-            // console.log("shouldBeEqual",el,ansArr[id])
-            if (el !== ansArr[id]){
-                error_++
-            }
+        .then(res => {
+            var arr = res.questions.map(answer => answer.answer)
+            // console.log("Should be an array : ", arr)
+            var error_ = 0
+            arr.forEach((el, id) => {
+                // console.log("shouldBeEqual",el,ansArr[id])
+                if (el !== ansArr[id]) {
+                    error_++
+                }
+            })
+            if (error_ === 0) { return true } else { return false }
         })
-        if(error_===0){return true}else{return false}
-    })
 }
 
 function addSession(username) {
     return sessions.then(sessionsCollection => {
         return sessionsCollection
             .insertOne({ username, createdAt: new Date() })
-            .then(res => res.insertedId.valueOf())
+            .then(res => { console.log(username, res.insertedId); return res.insertedId.valueOf(); })
             .catch(err => console.log(err))
     })
 }
@@ -273,13 +339,13 @@ async function search(searchObj) {
     //return searchResults;
 }
 
-function addChat(username, chatID) {
+function addChat(username, target) {
     return users.then(usersCollection => {
         return usersCollection.update(
             { username },
-            { $addToSet: { chats: chatID} }
+            { $addToSet: { chats: target } }
         )
-        .catch(err => console.log(err))
+            .catch(err => console.log(err))
     })
 }
 
@@ -289,8 +355,21 @@ function createChat(senderName, receiverName) {
             name: `${senderName}+${receiverName}`,
             messages: []
         })
-        .then(res => res.insertedId)
-        .catch(err => console.log(err))
+            .then(res => res.insertedId)
+            .catch(err => console.log(err))
+    })
+}
+
+function getChats(sessionID) {
+    return getUsername(sessionID)
+    .then(username => {
+        return users.then(usersCollection => {
+            return usersCollection.findOne({
+                username
+            })
+            .then(res => { console.log('HEYYYYYYYYYYYY', username, res); return res.chats })
+            .catch(err => console.log(err))
+        })
     })
 }
 
@@ -299,32 +378,32 @@ function getChatByID(chatID) {
         return chatsCollection.findOne({
             _id: ObjectId(chatID)
         })
-        .catch(err => console.log(err))
+            .catch(err => console.log(err))
     })
-   }
+}
 
 function getChatByName(senderName, receiverName) {
- return chats.then(chatsCollection => {
-     return chatsCollection.findOne({
-         name: `${senderName}+${receiverName}`
-     })
-     .catch(err => console.log(err))
- })
+    return chats.then(chatsCollection => {
+        return chatsCollection.findOne({
+            name: `${senderName}+${receiverName}`
+        })
+            .catch(err => console.log(err))
+    })
 }
 
 async function getChat(senderName, receiverName) {
     console.log(senderName, receiverName);
     let chat = await getChatByName(senderName, receiverName);
     console.log('chat', chat);
-    if(chat) return chat;
+    if (chat) return chat;
     chat = await getChatByName(receiverName, senderName);
     console.log('chat', chat);
-    if(chat) return chat;
+    if (chat) return chat;
     console.log('creating chat');
     let chatID = await createChat(senderName, receiverName);
     console.log(chatID);
-    await addChat(senderName, chatID);
-    await addChat(receiverName, chatID);
+    await addChat(senderName, receiverName);
+    await addChat(receiverName, senderName);
     chat = await getChatByID(chatID);
     console.log(chat)
     return chat;
@@ -335,9 +414,9 @@ function addMessage(chatID, messageObj) {
     return chats.then(chatsCollection => {
         return chatsCollection.update(
             { _id: ObjectId(chatID) },
-            { $push: { messages: messageObj} }
+            { $push: { messages: messageObj } }
         )
-        .catch(err => console.log(err))
+            .catch(err => console.log(err))
     })
 }
 
@@ -354,7 +433,11 @@ module.exports = {
     verifyUsername,
     checkLiked,
     getLikedUsers,
-    chechAnswers,
+    checkAnswers,
     getChat,
-    addMessage
+    getChats,
+    addMessage,
+    logoutUser,
+    editProfile,
+    removeLike
 };
