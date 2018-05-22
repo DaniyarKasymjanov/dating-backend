@@ -236,7 +236,7 @@ app.post('/uploadProfileImg', (req, res) => {
     res.send(JSON.stringify({ success: true, imageName: `${randomFileName}.${extension}` }));
 });
 
-app.post('/uploadBackgroundImg', (req, res) => {
+app.post('/uploadBackgroundImage', (req, res) => {
     let extension = req.query.extension;
     let randomFileName = Math.random().toString(36).substring(7);
     console.log(`items/${randomFileName}.${extension}`);
