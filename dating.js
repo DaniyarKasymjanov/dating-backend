@@ -95,6 +95,7 @@ function editProfile(sessionID, editObj) {
 }
 
 function updateQuestions(sessionID, questionObj) {
+    console.log(questionObj)
     return getUsername(sessionID)
         .then(username => {
             return users.then(usersCollection => {
@@ -439,5 +440,6 @@ module.exports = {
     addMessage,
     logoutUser,
     editProfile,
-    removeLike
+    removeLike,
+    updateQuestions
 };

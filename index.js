@@ -159,7 +159,7 @@ app.post('/editProfile', (req, res) => {
     })
 })
 
-app.post('updateQuestions', (req, res) => {
+app.post('/updateQuestions', (req, res) => {
     let sessionID = req.cookies.session;
     let parsedBody = JSON.parse(req.body.toString());
     dating.updateQuestions(sessionID, parsedBody).then (result => {
