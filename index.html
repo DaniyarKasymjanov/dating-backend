@@ -19,11 +19,25 @@
 
                 //         })
                 // })
-                //  fetch('/login', {
-                //     method:
+                fetch('/updateQuestions', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                         questions:
+                            [ { title: 'dfgdfgdfgdfgdfg',
+                                answers: [],
+                                type: 'bool',
+                                answer: 'True' },
+                                { title: 'decode',
+                                answers: [],
+                                type: 'bool',
+                                answer: 'True' },
+                                { title: 'decode', answers: [], type: 'bool', answer: 'True' },
+                                { title: 'd', answers: [], type: 'bool', answer: 'True' } ] }
+                                                )
                     
                     
-                // }).then(e=>e.text()).then(e=>JSON.parse(e)).then(e=>console.log(e))
+                }).then(e=>e.text()).then(e=>JSON.parse(e)).then(e=>console.log(e))
             }
         </script>
     </body>

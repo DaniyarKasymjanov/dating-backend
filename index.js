@@ -58,8 +58,8 @@ app.post('/register', async (req, res) => {
     //register user
     parsedBody.accountCreationTime = Date.now();
     parsedBody.likes = []
-    dating.registerUser(parsedBody).then(() =>
-        res.send(JSON.stringify({ success: true })))
+    dating.registerUser(parsedBody).then((result) =>
+        res.send(JSON.stringify({ success: true, username: result })))
         .catch(err => {
             console.log(err);
             res.send(JSON.stringify({ success: false }))

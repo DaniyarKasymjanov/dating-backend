@@ -27,9 +27,11 @@ function registerUser(userObj) {
             .insertOne(userObj)
             .then(res => res.insertedId.valueOf())
             .then(result => {
-                console.log(result)
-                return result.findOne({ _id: ObjectId(result) })
-                .then(res => res.username)
+                console.log("ASD",result)
+                return users.then(asd=>{
+                    return asd.findOne({ _id: ObjectId(result) })
+                    .then(e => {console.log("CROCO",e);e.username})
+                })
                 
             })
     })
@@ -78,13 +80,13 @@ function userProfile(profileObj) {
 }
 
 function editProfile(sessionID, editObj) {
-    //console.log(editObj, sessionID)
+    console.log(editObj, sessionID)
     return getUsername(sessionID)
         .then(username => {
             return users.then(usersCollection => {
                 return usersCollection.findOneAndUpdate(
                     { username: username },
-                    editObj)
+                    { $set: { ...editObj } })
                     .then(res => {
                         console.log(res)
                         return res
@@ -101,7 +103,7 @@ function updateQuestions(sessionID, questionObj) {
             return users.then(usersCollection => {
                 return usersCollection.findOneAndUpdate(
                     { username: username },
-                    questionObj)
+                    { $set: { questions: questionObj.questions } })
                     .then(res => {
                         console.log(res)
                         return res
@@ -163,6 +165,7 @@ function getLikedUsers(sessionID) {
 }
 
 function getUsername(sessionID) {
+    console.log(sessionID)
     return sessions.then(sessionsCollection => {
         return sessionsCollection
             .findOne({ _id: ObjectId(sessionID) })
@@ -440,6 +443,6 @@ module.exports = {
     addMessage,
     logoutUser,
     editProfile,
-    removeLike,
-    updateQuestions
+    updateQuestions,
+    removeLike
 };
