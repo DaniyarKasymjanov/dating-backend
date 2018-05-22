@@ -30,17 +30,16 @@ function registerUser(userObj) {
                 console.log("ASD",result)
                 return users.then(asd=>{
                     return asd.findOne({ _id: ObjectId(result) })
-                    .then(e => {console.log("CROCO",e);e.username})
+                    .then(e => {console.log("CROCO",e); return e.username})
                 })
                 
             })
     })
-    .catch(err => console.log(err))
 }
 
 function loginUser(loginObj) {
     return users.then(usersCollection => {
-        //console.log(loginObj);
+        console.log(loginObj);
         return usersCollection
             .findOne(loginObj)
             .then(res => {
@@ -64,6 +63,20 @@ function newAccounts(date) {
         return usersCollection
             .find({ accountCreationTime: { $gt: date } })
             .toArray()
+    })
+}
+
+function getSpotlight(sessionID) {
+    return getUsername(sessionID)
+    .then(username => {
+        return users.then(usersCollection => {
+            return usersCollection.findOne(
+                { username: username })
+                .then(res => {
+                    console.log(res)
+                    return res
+                })
+        })
     })
 }
 

@@ -31,7 +31,7 @@ app.get('/session', async (req, res) => {
 
 app.post('/verifyUsername', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
-    console.log("par",parsedBody);
+    console.log("verify username parsedbody",parsedBody);
     dating.verifyUsername(parsedBody).then((result) => {
         console.log("res",result)
         if (result) {
@@ -50,11 +50,11 @@ app.post('/verifyUsername', async (req, res) => {
 
 app.post('/register', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
-    //console.log(parsedBody);
+    console.log('register parsed', parsedBody);
     //add user session
     const sessionID = await dating.addSession(parsedBody.username);
-    res.cookie('REGISTER sessionID', sessionID);
-    console.log(sessionID)
+    res.cookie('session', sessionID);
+    console.log('sessionID', sessionID)
     //register user
     parsedBody.accountCreationTime = Date.now();
     parsedBody.likes = []
@@ -69,12 +69,12 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
     //console.log(parsedBody);
-    const sessionID = await dating.addSession(parsedBody.username);
-    console.log('LOGIN sessionID', sessionID)
-    res.cookie('session', sessionID);
-    dating.loginUser(parsedBody).then((result) => {
+    dating.loginUser(parsedBody).then(async (result) => {
         console.log('hgfdsfghjhgfds', result)
         if (result) {
+            const sessionID = await dating.addSession(parsedBody.username);
+            console.log('sessionID', sessionID)
+            res.cookie('session', sessionID);
             res.send(JSON.stringify({ success: true, username: result }))
         }
         else {
@@ -83,7 +83,7 @@ app.post('/login', async (req, res) => {
     })
         .catch(err => {
             console.log(err);
-
+            res.send(JSON.stringify({ success: false }))
         });
 
 });
@@ -150,6 +150,13 @@ app.get('/getProfile', (req, res) => {
 
         });
 });
+
+app.get('/spotlight', (req, res) => {
+    let sessionID = req.cookies.session;
+    dating.getSpotlight(sessionID).then((result) => {
+        res.send(JSON.stringify({success: true, result}))
+    })
+})
 
 app.post('/editProfile', (req, res) => {
     let sessionID = req.cookies.session;
