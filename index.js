@@ -186,7 +186,7 @@ app.post('/checkAnswers', (req,res) => {
     let parsedBody = JSON.parse(req.body.toString());
     let username = parsedBody.username;
     let ansArr = parsedBody.answer
-    dating.checkAnswers(username, ansArr).then(result => {
+    dating.checkAnswers(sessionID, username, ansArr).then(result => {
         res.send(JSON.stringify({success: result}));
     })
     .catch(err => {
