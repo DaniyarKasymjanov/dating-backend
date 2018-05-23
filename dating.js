@@ -44,7 +44,7 @@ function loginUser(loginObj) {
             .findOne(loginObj)
             .then(res => {
                 console.log('looking for user', res)
-                return res.username
+                return res
             })
     })
 }

@@ -75,7 +75,7 @@ app.post('/login', async (req, res) => {
             const sessionID = await dating.addSession(parsedBody.username);
             console.log('sessionID', sessionID)
             res.cookie('session', sessionID);
-            res.send(JSON.stringify({ success: true, username: result }))
+            res.send(JSON.stringify({ success: true, result }))
         }
         else {
             res.send(JSON.stringify({ success: false }))
