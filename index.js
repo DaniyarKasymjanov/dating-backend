@@ -255,7 +255,8 @@ app.get('/getChats', (req, res) => {
     let sessionID = req.cookies.session
     dating.getChats(sessionID)
     .then(chats => {
-        return res.send(JSON.stringify({ success: true, chats }));
+        if(chats) return res.send(JSON.stringify({ success: true, chats }));
+        return res.send(JSON.stringify({ success: false }));
     })
 });
 
@@ -270,12 +271,15 @@ app.post('/getChat', (req, res) => {
 io.on('connection', (socket) => {
     console.log('a user connected to chat');
     socket.on('join', (res) => {
+        console.log(res)
         socket.chatID = res.chatID;
         socket.join(res.chatID);
     })
     socket.on('send_msg', (res) => {
+        console.log(res, socket.chatID)
         dating.addMessage(socket.chatID, res);
-        socket.emit('receive_msg', res);
+        // socket.emit('receive_msg', res);
+        io.in(socket.chatID).emit('receive_msg', res);
     });
     socket.on('disconnect', (reason) => {
         console.log('disconnected: ', reason);
