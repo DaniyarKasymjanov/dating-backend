@@ -219,8 +219,12 @@ app.post('/unlike', (req, res) => {
 app.post('/search', async (req, res) => {
     let parsedBody = JSON.parse(req.body.toString());
     try {
-        const result = await dating.search(parsedBody);
-        console.log(result)
+        let searchObj = {searchInput: parsedBody.searchInput};
+        let fields = Object.keys(parsedBody.fields)
+        .filter(key => parsedBody.fields[key] !== '');
+        if(fields.length > 0) searchObj.fields = fields.reduce((acc, currKey) => ({ ...acc, [currKey]: parsedBody.fields[currKey] }), {});
+        if(Object.values(parsedBody.age).some(val => val !== '')) searchObj.age = parsedBody.age;
+        const result = await dating.search(searchObj);
         res.send(JSON.stringify({ success: true, result }));
     } catch (err) {
         console.log(err)

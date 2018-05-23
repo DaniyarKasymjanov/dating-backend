@@ -257,17 +257,18 @@ function addSession(username) {
 
 function getBirthday(age) {
     const now = new Date();
-    return new Date(now.setFullYear(now.getFullYear() - age));
+    return new Date(now.setFullYear(now.getFullYear() - Number(age)));
 }
 
 //needs parameter of the form {from: 20, to: 40}
 function searchAge(age) {
     const gteBirthday = getBirthday(age.to);
     const lteBirthday = getBirthday(age.from);
+    console.log('gteBirthday', gteBirthday, lteBirthday)
     return users.then(usersCollection => {
         return usersCollection
             .find({
-                birthday: { $gte: gteBirthday, $lte: lteBirthday }
+                birthday: { $gte: gteBirthday.toISOString(), $lte: lteBirthday.toISOString() }
             })
             .toArray()
     })
@@ -289,7 +290,8 @@ function searchInput(input) {
     return users.then(usersCollection => {
         return usersCollection
             .find({
-                $or: ['city', 'interests', 'aboutMe', 'lookingFor', 'education'].map(key => ({
+                $or: ['username', 'city', 'interests', 'aboutMe', 'lookingFor', 'education']
+                .map(key => ({
                     [key]: { $regex: new RegExp(input, 'gi') }
                 }))
             })
@@ -348,6 +350,7 @@ function inter(arr) {
 }
 
 async function search(searchObj) {
+    console.log('searchObj', searchObj);
     let searchPromises = [];
     let dupCount = -1;
     if (searchObj.age) {
@@ -363,6 +366,7 @@ async function search(searchObj) {
         dupCount++;
     }
     let searchResults = await Promise.all(searchPromises);
+    // console.log('searchResultssearchResultssearchResults',searchResults)
     let ret = inter(searchResults);
     return ret;
     // searchResults = flatten(searchResults);
