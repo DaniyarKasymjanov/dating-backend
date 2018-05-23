@@ -175,6 +175,7 @@ app.post('/updateQuestions', (req, res) => {
 })
 
 app.post('/checkAnswers', (req,res) => {
+    let sessionID = req.cookies.session
     let parsedBody = JSON.parse(req.body.toString());
     let username = parsedBody.username;
     let ansArr = parsedBody.answer

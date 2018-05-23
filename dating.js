@@ -216,8 +216,16 @@ function removeLike(sessionID, target) {
         )
 }
 
-function checkAnswers(username, ansArr) {
-    return getUser(username)
+function saveAnswers(ownUsername, username, result) {
+    return users.then(usersCollection => {
+        return usersCollection
+            .findOneAndUpdate({ username: ownUsername },{$push: {savedAnswers: {username, result}}})
+    })
+}
+
+function checkAnswers(sessionID, username, ansArr) {
+    return getUsername(sessionID).then(ownUsername => {
+        return getUser(username)
         .then(res => {
             var arr = res.questions.map(answer => answer.answer)
             // console.log("Should be an array : ", arr)
@@ -230,6 +238,12 @@ function checkAnswers(username, ansArr) {
             })
             if (error_ === 0) { return true } else { return false }
         })
+        .then(async result => {
+            await saveAnswers(ownUsername, username, result);
+            return result;
+        })
+    })
+    
 }
 
 function addSession(username) {
