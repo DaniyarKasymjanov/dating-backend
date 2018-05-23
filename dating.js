@@ -147,7 +147,13 @@ function checkLiked(sessionID, target) {
             })
         })
 }
-
+ function getProfileImage(username) {
+    return users.then(usersCollection => {
+        return usersCollection
+            .findOne({ username })
+            .then(res => res.profileImg)
+    })
+ }
 function getUser(username) {
     return users.then(usersCollection => {
         return usersCollection
@@ -475,5 +481,6 @@ module.exports = {
     logoutUser,
     editProfile,
     updateQuestions,
-    removeLike
+    removeLike,
+    getProfileImage
 };

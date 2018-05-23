@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const dating = require('./dating.js');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
-app.use(bodyParser.raw({ type: '*/*' }))
+app.use(bodyParser.raw({ type: '*/*', limit: '50mb' }))
 app.use(cookieParser())
 app.use(express.static('images'))
 
@@ -150,6 +150,13 @@ app.get('/getProfile', (req, res) => {
 
         });
 });
+
+app.get('/chatProfileImage', (req, res) => {
+    const username = req.query.username;
+    dating.getProfileImage(username).then(result => {
+        res.send(JSON.stringify({sucess: true, result}))
+    })
+})
 
 app.get('/spotlight', (req, res) => {
     let sessionID = req.cookies.session;
